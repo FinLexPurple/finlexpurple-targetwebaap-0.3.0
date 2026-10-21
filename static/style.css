@@ -56,6 +56,8 @@ body {
 .btn:hover { background: var(--purple-dark); }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: 24px 0; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+a.card { text-decoration: none; color: inherit; display: block; }
+a.card:hover { border-color: var(--purple); }
 .card h3 { margin: 0 0 6px; }
 .panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
 .panel.narrow { max-width: 460px; }
