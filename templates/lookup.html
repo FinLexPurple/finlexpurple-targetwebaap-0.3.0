@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Account lookup{% endblock %}
+{% block content %}
+<section class="panel">
+  <h2>Account lookup</h2>
+  <p class="muted">Look up a demo account by its number (e.g. <code>DEMO-0001-ALICE</code>).</p>
+  <form method="get" action="{{ url_for('lookup') }}">
+    <label>Account number<input name="account" value="{{ account }}"></label>
+    <button class="btn" type="submit">Look up</button>
+  </form>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  {% if sql %}<pre class="debug">sql: {{ sql }}</pre>{% endif %}
+  {% if results %}
+    <table class="grid">
+      <tr><th>Number</th><th>Type</th></tr>
+      {% for r in results %}<tr><td>{{ r['number'] }}</td><td>{{ r['kind'] }}</td></tr>{% endfor %}
+    </table>
+  {% endif %}
+</section>
+{% endblock %}
