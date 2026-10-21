@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block content %}
+<section class="panel narrow">
+  <h2>Log in</h2>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  {% if query %}<pre class="debug">query: {{ query }}</pre>{% endif %}
+  <form method="post" action="{{ url_for('login') }}">
+    <label>Username<input name="username" autocomplete="off"></label>
+    <label>Password<input name="password" type="password" autocomplete="off"></label>
+    <button class="btn" type="submit">Log in</button>
+  </form>
+  <p class="demo-creds">Demo logins: <code>alice / alice123</code> · <code>bob / bob123</code></p>
+</section>
+{% endblock %}
