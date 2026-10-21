@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Search{% endblock %}
+{% block content %}
+<section class="panel">
+  <h2>Search transactions</h2>
+  <form method="get" action="{{ url_for('search') }}">
+    <label>Query<input name="q" value="{{ q }}"></label>
+    <button class="btn" type="submit">Search</button>
+  </form>
+  {% if q %}
+    <!-- VULN: reflected XSS — q rendered unescaped into the DOM. -->
+    <p class="results-head">Showing results for: {{ q|safe }}</p>
+    <p class="muted">No matching transactions in this demo dataset.</p>
+  {% endif %}
+</section>
+{% endblock %}
