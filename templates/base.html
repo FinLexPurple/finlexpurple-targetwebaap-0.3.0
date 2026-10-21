@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}FLP Demo Bank{% endblock %} — FinLexPurple Target</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="warnbar">⚠ DELIBERATELY VULNERABLE TEST TARGET — FinLexPurple 0.3.0 — localhost only, do not deploy</div>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('index') }}">◆ FLP Demo Bank <span class="fict">(fictional)</span></a>
+    <nav>
+      <a href="{{ url_for('search') }}">Search</a>
+      <a href="{{ url_for('lookup') }}">Account lookup</a>
+      {% if user %}
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('invoices') }}">Invoices</a>
+        <a href="{{ url_for('profile') }}">Profile</a>
+        <a href="{{ url_for('logout') }}">Log out ({{ user['username'] }})</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">Log in</a>
+      {% endif %}
+    </nav>
+  </header>
+  <main class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="foot">
+    FLP Demo Bank is a fictional application built solely to test the
+    FinLexPurple&nbsp;0.3.0 security scanner. It contains intentional vulnerabilities.
+  </footer>
+</body>
+</html>
