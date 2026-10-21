@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Import logo{% endblock %}
+{% block content %}
+<section class="panel">
+  <h2>Import logo from URL</h2>
+  <p class="muted">Paste a URL and the server will fetch the image for your profile
+  (also used as a webhook connectivity test).</p>
+  <form method="get" action="{{ url_for('fetch_logo') }}">
+    <label>Logo / webhook URL<input name="url" value="{{ url }}" placeholder="http://example.com/logo.png"></label>
+    <button class="btn" type="submit">Fetch</button>
+  </form>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  {% if fetched %}
+    <h3>Server fetched:</h3>
+    <dl class="kv">
+      <dt>Status</dt><dd>{{ fetched['status'] }}</dd>
+      <dt>Content-Type</dt><dd>{{ fetched['content_type'] }}</dd>
+      <dt>Bytes</dt><dd>{{ fetched['length'] }}</dd>
+    </dl>
+    <pre class="debug">{{ fetched['preview'] }}</pre>
+  {% endif %}
+</section>
+{% endblock %}
