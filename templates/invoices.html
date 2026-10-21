@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Invoices{% endblock %}
+{% block content %}
+<section class="panel">
+  <h2>Your invoices</h2>
+  <table class="grid">
+    <tr><th>ID</th><th>Counterparty</th><th>Memo</th><th>Amount</th><th>Status</th></tr>
+    {% for inv in invoices %}
+      <tr>
+        <td><a href="{{ url_for('invoice', invoice_id=inv['id']) }}">#{{ inv['id'] }}</a></td>
+        <td>{{ inv['counterparty'] }}</td>
+        <td>{{ inv['memo'] }}</td>
+        <td>${{ '%.2f' % (inv['amount_cents'] / 100) }}</td>
+        <td>{{ inv['status'] }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+</section>
+{% endblock %}
