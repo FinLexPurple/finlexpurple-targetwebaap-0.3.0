@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>FLP Demo Bank</h1>
+  <p class="lede">Simple payments &amp; invoicing demo — a versioned, deliberately
+  vulnerable target for testing <strong>FinLexPurple 0.3.0</strong>.</p>
+  <p>
+    {% if user %}
+      Signed in as <strong>{{ user['full_name'] }}</strong>.
+      <a class="btn" href="{{ url_for('dashboard') }}">Go to dashboard</a>
+    {% else %}
+      <a class="btn" href="{{ url_for('login') }}">Log in</a>
+    {% endif %}
+  </p>
+</section>
+<section class="cards">
+  <div class="card"><h3>Accounts</h3><p>Check balances across checking and savings.</p></div>
+  <div class="card"><h3>Invoices</h3><p>Track what's paid and what's due.</p></div>
+  <div class="card"><h3>Import logo</h3><p>Fetch a brand logo from a URL for your profile.</p></div>
+</section>
+<p class="demo-creds">Demo logins: <code>alice / alice123</code> · <code>bob / bob123</code></p>
+{% endblock %}
