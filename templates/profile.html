@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<section class="panel narrow">
+  <h2>Profile</h2>
+  <dl class="kv">
+    <dt>Username</dt><dd>{{ user['username'] }}</dd>
+    <dt>Full name</dt><dd>{{ user['full_name'] }}</dd>
+    <dt>Email</dt><dd>{{ user['email'] }}</dd>
+    <dt>User id</dt><dd>{{ user['id'] }}</dd>
+  </dl>
+  <p><a class="btn" href="{{ url_for('fetch_logo') }}">Import a logo from URL</a></p>
+</section>
+{% endblock %}
