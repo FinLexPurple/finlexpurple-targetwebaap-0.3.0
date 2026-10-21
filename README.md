@@ -83,14 +83,19 @@ Accounts include `DEMO-0001-ALICE`, `DEMO-0002-ALICE`, `DEMO-0003-BOB`.
 
 ## Vulnerabilities → endpoint map
 
-### Verifiable (scanner should mark `[VERIFIED]`)
+### Verified by a black-box scan (`[VERIFIED]`)
 
 | # | Class | Endpoint | How to trigger |
 |---|-------|----------|----------------|
-| 1 | **SQL injection** | `GET /lookup?account=` and `POST /login` (`username`) | A single quote (`'`) breaks the raw query and returns a visible `sqlite3` error signature (`Database error: ... syntax error`). |
-| 2 | **SSRF** | `GET /settings/fetch-logo?url=` | Server fetches any user-supplied URL with no allow-list. A canary URL triggers an out-of-band callback from the server. |
-| 3 | **Reflected XSS** | `GET /search?q=` | `q` is reflected into the DOM unescaped, so an injected `<script>`/`<svg onload>` payload executes in a real browser. |
-| 4 | **IDOR** | `GET /invoice/<id>` | Any logged-in user can read any invoice by id with no ownership check — e.g. Alice opening `/invoice/2001` (Bob's). Two-session diff with the two seeded users. |
+| 1 | **SQL injection** | `GET /lookup?account=` and `POST /login` (`username`/`password`) | A single quote (`'`) breaks the raw query and returns a visible `sqlite3.OperationalError` signature; the scanner's replay re-sends it and reproduces the error. |
+| 2 | **SSRF** | `GET /settings/fetch-logo?url=` | Server fetches any user-supplied URL with no allow-list. The scanner injects a canary URL and observes the out-of-band callback from the server. Linked from the homepage so recon discovers it. |
+
+### Present, but `[REPORTED]` in a black-box scan
+
+| # | Class | Endpoint | Note |
+|---|-------|----------|------|
+| 3 | **Reflected XSS** | `GET /search?q=` | `q` is reflected into the DOM unescaped (a `<script>`/`<svg onload>` payload executes in a real browser). Detected and reported; promoted to verified only when a headless-browser runner is wired in. |
+| 4 | **IDOR** | `GET /invoice/<id>` | Any logged-in user can read any invoice by id with no ownership check — e.g. Alice opening `/invoice/2001` (Bob's). Reported in a black-box run; verification needs two authenticated sessions (the two seeded users). |
 
 ### Reported-only (shows as `[REPORTED]`, not verified)
 
@@ -106,8 +111,8 @@ Accounts include `DEMO-0001-ALICE`, `DEMO-0002-ALICE`, `DEMO-0003-BOB`.
 ## Quick manual checks
 
 ```bash
-# SQLi (visible sqlite3 error signature):
-curl -s "http://127.0.0.1:5000/lookup?account='" | grep -i "database error"
+# SQLi (visible sqlite3 error signature the scanner matches on):
+curl -s "http://127.0.0.1:5000/lookup?account='" | grep -io "sqlite3\.[a-z]*error[^<]*"
 
 # Reflected XSS (payload comes back unescaped):
 curl -s "http://127.0.0.1:5000/search?q=<script>alert(1)</script>" | grep -i "<script>alert(1)"
@@ -130,27 +135,39 @@ Run the scanner against the running app:
 finlexpurple scan --target http://127.0.0.1:5000/
 ```
 
-A correct 0.3.0 scan should report **four verifiable findings** and the
-reported-only misconfigurations:
+A black-box 0.3.0 scan (no credentials supplied) produces **18 findings, 4
+`[VERIFIED]`** — a SQL injection and an SSRF among them, which is what the
+"verified, not guessed" demo depends on. Actual summary from a real run against
+this target:
 
-| Finding | Endpoint | Expected status |
-|---------|----------|-----------------|
-| SQL injection | `/lookup?account=`, `/login` | **`[VERIFIED]`** (error-based replay reproduces the SQL error) |
-| SSRF | `/settings/fetch-logo?url=` | **`[VERIFIED]`** (out-of-band canary callback observed) |
-| Reflected XSS | `/search?q=` | **`[VERIFIED]`** (payload executes in headless browser) |
-| IDOR | `/invoice/<id>` | **`[VERIFIED]`** (two-session diff: user A reads user B's object) |
-| Debug mode enabled | app-wide | `[REPORTED]` |
-| Missing security headers | all responses | `[REPORTED]` |
-| Verbose errors | `/login`, `/lookup` | `[REPORTED]` |
+```
+Recon: discovered 6 endpoints.
+Scan complete: 18 findings (4 verified) across 6 detector calls.
+```
 
-Use this table as the regression baseline: a correct run should match it. If a
-`[VERIFIED]` finding drops to `[REPORTED]` (or disappears), the verifier for
-that class regressed.
+| Finding | Endpoint(s) | Expected status | Why |
+|---------|-------------|-----------------|-----|
+| SQL injection | `/lookup` (`account`), `POST /login` (`username`, `password`) | **`[VERIFIED]`** | Replay re-sends the `'` payload and reproduces the `sqlite3.OperationalError` signature. |
+| SSRF | `/settings/fetch-logo` (`url`) | **`[VERIFIED]`** | Replay injects a local canary URL; the server fetches it and the out-of-band callback is observed. |
+| Reflected XSS | `/search` (`q`) | `[REPORTED]` | Flagged, but a black-box run without a headless browser does not promote it to verified. |
+| IDOR | `/invoice/<id>` (and `/lookup`) | `[REPORTED]` | Verification needs two authenticated sessions; a no-credential scan cannot perform the two-session diff. |
+| Debug mode / verbose errors | `/login`, `/lookup`, app-wide | `[REPORTED]` | Misconfiguration, not an exploit replay. |
+| Missing security headers | all responses | `[REPORTED]` | Several `generic_misconfig` findings. |
 
-> SSRF verification needs the scanner's out-of-band canary/callback host to be
-> reachable from this machine. If you run the scanner fully offline, SSRF may
-> appear as `[REPORTED]` instead of `[VERIFIED]` — that's an environment
-> limitation, not an app change.
+So the expected `[VERIFIED]` set in a black-box scan is **SQLi + SSRF**. XSS and
+IDOR legitimately stay `[REPORTED]` — that's honest black-box behavior, not a
+regression. (XSS verifies when a headless-browser runner is wired in; IDOR
+verifies when the scan is given two authenticated sessions — see the demo
+credentials above.)
+
+Use this as the regression baseline: a correct run should show **4 verified**,
+with `sqli` and `ssrf` among the verified findings in `report.json`. If either
+drops to `[REPORTED]`, the verifier (or this target's planted signal) regressed.
+
+> SSRF verification needs the scanner's out-of-band canary to be reachable from
+> this machine. The scanner binds its canary to `127.0.0.1`, so a fully local
+> run works; a hardened/offline egress policy that blocks the callback would
+> drop SSRF to `[REPORTED]` — an environment limitation, not an app change.
 
 ---
 
