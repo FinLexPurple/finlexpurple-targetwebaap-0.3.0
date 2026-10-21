@@ -17,7 +17,7 @@
 <section class="cards">
   <div class="card"><h3>Accounts</h3><p>Check balances across checking and savings.</p></div>
   <div class="card"><h3>Invoices</h3><p>Track what's paid and what's due.</p></div>
-  <div class="card"><h3>Import logo</h3><p>Fetch a brand logo from a URL for your profile.</p></div>
+  <a class="card" href="{{ url_for('fetch_logo') }}"><h3>Import logo</h3><p>Fetch a brand logo from a URL for your profile.</p></a>
 </section>
 <p class="demo-creds">Demo logins: <code>alice / alice123</code> · <code>bob / bob123</code></p>
 {% endblock %}
