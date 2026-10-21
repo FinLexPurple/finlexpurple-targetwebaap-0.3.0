@@ -13,6 +13,7 @@
     <nav>
       <a href="{{ url_for('search') }}">Search</a>
       <a href="{{ url_for('lookup') }}">Account lookup</a>
+      <a href="{{ url_for('fetch_logo') }}">Import logo</a>
       {% if user %}
         <a href="{{ url_for('dashboard') }}">Dashboard</a>
         <a href="{{ url_for('invoices') }}">Invoices</a>
