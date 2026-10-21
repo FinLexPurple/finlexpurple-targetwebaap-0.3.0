@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Invoice{% endblock %}
+{% block content %}
+<section class="panel narrow">
+  {% if invoice %}
+    <h2>Invoice #{{ invoice['id'] }}</h2>
+    <dl class="kv">
+      <dt>Counterparty</dt><dd>{{ invoice['counterparty'] }}</dd>
+      <dt>Memo</dt><dd>{{ invoice['memo'] }}</dd>
+      <dt>Amount</dt><dd>${{ '%.2f' % (invoice['amount_cents'] / 100) }}</dd>
+      <dt>Status</dt><dd>{{ invoice['status'] }}</dd>
+      <dt>Owner (user id)</dt><dd>{{ invoice['user_id'] }}</dd>
+    </dl>
+    <p><a href="{{ url_for('invoices') }}">← Back to invoices</a></p>
+  {% else %}
+    <h2>Invoice not found</h2>
+    <p><a href="{{ url_for('invoices') }}">← Back to invoices</a></p>
+  {% endif %}
+</section>
+{% endblock %}
