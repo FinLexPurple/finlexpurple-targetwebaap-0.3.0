@@ -11,6 +11,11 @@
 > - It is a **fictional** "FLP Demo Bank" — not a real bank or payment provider.
 >   Do not use it to impersonate any real organization.
 
+> ✅ **Validated against `finlexpurple` 0.3.0 (published PyPI release).**
+> A real scan produced **18 findings, 4 `[VERIFIED]`** (SQLi ×3 + SSRF), with
+> offline bundle re-verification passing. Full real output:
+> [reports/scan-0.3.0.md](reports/scan-0.3.0.md).
+
 ---
 
 ## Purpose
