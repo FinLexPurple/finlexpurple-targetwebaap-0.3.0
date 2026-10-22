@@ -1,5 +1,6 @@
 # Runtime / local artifacts
 .venv/
+.venv-test/
 __pycache__/
 *.pyc
 target.db
